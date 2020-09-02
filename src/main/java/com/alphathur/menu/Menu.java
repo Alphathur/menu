@@ -2,6 +2,11 @@ package com.alphathur.menu;
 
 import java.util.List;
 
+/**
+ * Basic menu struct, used to view for front-end application
+ *
+ * @param <T>
+ */
 public class Menu<T> {
     private String code;
     private String name;

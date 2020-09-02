@@ -6,7 +6,10 @@ import cn.hutool.core.util.StrUtil;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MenuNodeUtil {
+/**
+ * Basic CURD operation for menu node
+ */
+public class MenuNodeOperator {
 
     private static MenuNode current(List<MenuNode> menuNodes, String code) {
         return menuNodes.stream ().filter ( e -> e.getCode ().equals ( code ) ).findFirst ().orElse ( null );
@@ -20,113 +23,10 @@ public class MenuNodeUtil {
         if (type.equals ( "before" ) || type.equals ( "after" )) {
             cutHorizontal ( source, target, type, menuNodes );
         } else if (type.equals ( "inner_before" ) || type.equals ( "inner_after" )) {
-            cutVerticalNew ( source, target, type, menuNodes );
+            cutVertical ( source, target, type, menuNodes );
         } else {
             throw new RuntimeException ( "INVALID PARAM" );
         }
-    }
-
-    private static void cutHorizontal(String source, String target, String type, List<MenuNode> sourceNodes) {
-        MenuNode sourceNode = current ( sourceNodes, source );
-        MenuNode targetNode = current ( sourceNodes, target );
-        if (sourceNode == null || targetNode == null) {
-            throw new RuntimeException ( "INVALID PARAM" );
-        }
-        String sourceCutPosition = null;
-        String cutSource = null;
-        if (type.equals ( "before" )) {
-            cutSource = cutTargetBehind ( sourceNodes, source, target );
-            sourceCutPosition = target;
-        } else if (type.equals ( "after" )) {
-            MenuNode elderBrother = getElderBrothers ( sourceNodes, target ).stream ().findFirst ()
-                    .orElse ( null );
-            if (elderBrother != null) {
-                if (elderBrother != sourceNode) {
-                    cutSource = cutTargetBehind ( sourceNodes, source, elderBrother.getCode () );
-                    sourceCutPosition = elderBrother.getCode ();
-                }
-            } else {
-                sourceCutPosition = generateNewCode ( target, false );
-            }
-        } else {
-            throw new RuntimeException ( "INVALID PARAM" );
-        }
-        if (StrUtil.isBlank ( cutSource )) {
-            cutSource = source;
-        }
-        if (sourceCutPosition != null) {
-            cutSourceToTarget ( sourceNodes, cutSource, sourceCutPosition );
-        }
-    }
-
-    private static void cutVerticalNew(String source, String target, String type, List<MenuNode> menuNodes) {
-        MenuNode sourceNode = current ( menuNodes, source );
-        MenuNode targetNode = current ( menuNodes, target );
-        if (sourceNode == null || targetNode == null) {
-            throw new RuntimeException ( "INVALID PARAM" );
-        }
-        List<MenuNode> sonNodes = getChildren ( menuNodes, target );
-        List<MenuNode> closestSons = getClosestChild ( sonNodes, target );
-        if (type.equals ( "inner_before" )) {
-            //get the eldest brother
-            String elderBrotherCode = generateNewCodeBeforeClosestChildren ( target, closestSons );
-            MenuNode elderBrother = current ( menuNodes, elderBrotherCode );
-            String sourceCutPosition;
-            if (elderBrother != null) {
-                sourceCutPosition = elderBrother.getCode ();
-                String cutSource = cutTargetBehind ( closestSons, source, elderBrother.getCode () );
-                if (StrUtil.isBlank ( cutSource )) {
-                    cutSource = source;
-                }
-                //cut source and its children nodes to target position
-                cutSourceToTarget ( menuNodes, cutSource, sourceCutPosition );
-            } else {
-                //cut source and its children nodes to target position
-                String newCode = generateNewCodeAfterClosestChildren ( target, closestSons );
-                //cut source and its children nodes to target position : newCode
-                cutSourceToTarget ( menuNodes, source, newCode );
-            }
-        } else if (type.equals ( "inner_after" )) {
-            String newCode = generateNewCodeAfterClosestChildren ( target, closestSons );
-            //cut source and its children nodes to target position : newCode
-            cutSourceToTarget ( menuNodes, source, newCode );
-        } else {
-            throw new RuntimeException ( "INVALID PARAM" );
-        }
-    }
-
-    private static String cutTargetBehind(List<MenuNode> sourceNodes, String source, String target) {
-        //move target and its all brother's nodes behind
-        Map<String, String> targetBroPositionMap = buildBroPositionMap ( sourceNodes, target, false, false );
-        String targetNewKey = generateNewCode ( target, false );
-        targetBroPositionMap.put ( target, targetNewKey );
-        sortByMap ( targetBroPositionMap, sourceNodes );
-        //exclude source node if source node is target's brother node
-        return targetBroPositionMap.get ( source );
-    }
-
-    private static void cutSourceToTarget(List<MenuNode> sourceNodes, String source, String sourceCutPosition) {
-        //cut source and its children nodes to target position
-        List<MenuNode> sourceSons = getChildren ( sourceNodes, source );
-        Map<String, String> sourcePositionMap = buildSpecificPosition ( sourceSons, source,
-                sourceCutPosition );
-        sourcePositionMap.put ( source, sourceCutPosition );
-        sortByMap ( sourcePositionMap, sourceNodes );
-
-        //move source and its brother nodes forward
-        Map<String, String> sourceBroPositionMap = buildBroPositionMap ( sourceNodes, source, true, false );
-        sortByMap ( sourceBroPositionMap, sourceNodes );
-    }
-
-    private static Map<String, String> buildSpecificPosition(List<MenuNode> sourceNodes, String source,
-                                                             String target) {
-        Map<String, String> positionMap = new LinkedHashMap<> ();
-        sourceNodes.forEach ( sourceSon -> {
-            String oldKey = sourceSon.getCode ();
-            String newKey = oldKey.replace ( source, target );
-            positionMap.put ( oldKey, newKey );
-        } );
-        return positionMap;
     }
 
     public static void deleteNode(List<MenuNode> menuNodes, String code) {
@@ -223,6 +123,109 @@ public class MenuNodeUtil {
         sortByMap ( positionExchangeMap, menuNodes );
         insertNewNode ( newCode, name, menuNodes );
         return newCode;
+    }
+
+    private static void cutHorizontal(String source, String target, String type, List<MenuNode> sourceNodes) {
+        MenuNode sourceNode = current ( sourceNodes, source );
+        MenuNode targetNode = current ( sourceNodes, target );
+        if (sourceNode == null || targetNode == null) {
+            throw new RuntimeException ( "INVALID PARAM" );
+        }
+        String sourceCutPosition = null;
+        String cutSource = null;
+        if (type.equals ( "before" )) {
+            cutSource = cutTargetBehind ( sourceNodes, source, target );
+            sourceCutPosition = target;
+        } else if (type.equals ( "after" )) {
+            MenuNode elderBrother = getElderBrothers ( sourceNodes, target ).stream ().findFirst ()
+                    .orElse ( null );
+            if (elderBrother != null) {
+                if (elderBrother != sourceNode) {
+                    cutSource = cutTargetBehind ( sourceNodes, source, elderBrother.getCode () );
+                    sourceCutPosition = elderBrother.getCode ();
+                }
+            } else {
+                sourceCutPosition = generateNewCode ( target, false );
+            }
+        } else {
+            throw new RuntimeException ( "INVALID PARAM" );
+        }
+        if (StrUtil.isBlank ( cutSource )) {
+            cutSource = source;
+        }
+        if (sourceCutPosition != null) {
+            cutSourceToTarget ( sourceNodes, cutSource, sourceCutPosition );
+        }
+    }
+
+    private static void cutVertical(String source, String target, String type, List<MenuNode> menuNodes) {
+        MenuNode sourceNode = current ( menuNodes, source );
+        MenuNode targetNode = current ( menuNodes, target );
+        if (sourceNode == null || targetNode == null) {
+            throw new RuntimeException ( "INVALID PARAM" );
+        }
+        List<MenuNode> sonNodes = getChildren ( menuNodes, target );
+        List<MenuNode> closestSons = getClosestChild ( sonNodes, target );
+        if (type.equals ( "inner_before" )) {
+            //get the eldest brother
+            String elderBrotherCode = generateNewCodeBeforeClosestChildren ( target, closestSons );
+            MenuNode elderBrother = current ( menuNodes, elderBrotherCode );
+            String sourceCutPosition;
+            if (elderBrother != null) {
+                sourceCutPosition = elderBrother.getCode ();
+                String cutSource = cutTargetBehind ( closestSons, source, elderBrother.getCode () );
+                if (StrUtil.isBlank ( cutSource )) {
+                    cutSource = source;
+                }
+                //cut source and its children nodes to target position
+                cutSourceToTarget ( menuNodes, cutSource, sourceCutPosition );
+            } else {
+                //cut source and its children nodes to target position
+                String newCode = generateNewCodeAfterClosestChildren ( target, closestSons );
+                //cut source and its children nodes to target position : newCode
+                cutSourceToTarget ( menuNodes, source, newCode );
+            }
+        } else if (type.equals ( "inner_after" )) {
+            String newCode = generateNewCodeAfterClosestChildren ( target, closestSons );
+            //cut source and its children nodes to target position : newCode
+            cutSourceToTarget ( menuNodes, source, newCode );
+        } else {
+            throw new RuntimeException ( "INVALID PARAM" );
+        }
+    }
+
+    private static String cutTargetBehind(List<MenuNode> sourceNodes, String source, String target) {
+        //move target and its all brother's nodes behind
+        Map<String, String> targetBroPositionMap = buildBroPositionMap ( sourceNodes, target, false, false );
+        String targetNewKey = generateNewCode ( target, false );
+        targetBroPositionMap.put ( target, targetNewKey );
+        sortByMap ( targetBroPositionMap, sourceNodes );
+        //exclude source node if source node is target's brother node
+        return targetBroPositionMap.get ( source );
+    }
+
+    private static void cutSourceToTarget(List<MenuNode> sourceNodes, String source, String sourceCutPosition) {
+        //cut source and its children nodes to target position
+        List<MenuNode> sourceSons = getChildren ( sourceNodes, source );
+        Map<String, String> sourcePositionMap = buildSpecificPosition ( sourceSons, source,
+                sourceCutPosition );
+        sourcePositionMap.put ( source, sourceCutPosition );
+        sortByMap ( sourcePositionMap, sourceNodes );
+
+        //move source and its brother nodes forward
+        Map<String, String> sourceBroPositionMap = buildBroPositionMap ( sourceNodes, source, true, false );
+        sortByMap ( sourceBroPositionMap, sourceNodes );
+    }
+
+    private static Map<String, String> buildSpecificPosition(List<MenuNode> sourceNodes, String source,
+                                                             String target) {
+        Map<String, String> positionMap = new LinkedHashMap<> ();
+        sourceNodes.forEach ( sourceSon -> {
+            String oldKey = sourceSon.getCode ();
+            String newKey = oldKey.replace ( source, target );
+            positionMap.put ( oldKey, newKey );
+        } );
+        return positionMap;
     }
 
     private static Map<String, String> buildBroPositionMap(List<MenuNode> sourceNodes, String code,

@@ -48,41 +48,41 @@ public class AppTest {
         list.add ( node3 );
         list.add ( root );
 
-        MenuNodeUtil.insertSonBefore ( list, "a_2", "new node a20" );
+        MenuNodeOperator.insertSonBefore ( list, "a_2", "new node a20" );
         Menu<String> menu = MenuFactory.fromMenuNodes ( list );
         System.out.println ( menu );
 
 
-        MenuNodeUtil.insertSonBehind ( list, "a_2", "new node a21" );
+        MenuNodeOperator.insertSonBehind ( list, "a_2", "new node a21" );
         Menu<String> menu0 = MenuFactory.fromMenuNodes ( list );
         System.out.println ( menu0 );
 
 
-        MenuNodeUtil.insertBrotherBehind ( list, "a_2", "new node 23" );
+        MenuNodeOperator.insertBrotherBehind ( list, "a_2", "new node 23" );
         Menu<String> menu1 = MenuFactory.fromMenuNodes ( list );
         System.out.println ( menu1 );
 
-        MenuNodeUtil.insertBrotherBehind ( list, "a_1", "new node 2" );
+        MenuNodeOperator.insertBrotherBehind ( list, "a_1", "new node 2" );
         Menu<String> menu11 = MenuFactory.fromMenuNodes ( list );
         System.out.println ( menu11 );
 
-        MenuNodeUtil.insertBrotherBefore ( list, "a_1", "new node 222" );
+        MenuNodeOperator.insertBrotherBefore ( list, "a_1", "new node 222" );
         Menu<String> menu2 = MenuFactory.fromMenuNodes ( list );
         System.out.println ( menu2 );
 
-        MenuNodeUtil.deleteNode ( list, "a_4" );
+        MenuNodeOperator.deleteNode ( list, "a_4" );
         Menu<String> menu3 = MenuFactory.fromMenuNodes ( list );
         System.out.println ( menu3 );
 
-        MenuNodeUtil.cutAndPaste ( list, "a_3", "a_2", "before" );
+        MenuNodeOperator.cutAndPaste ( list, "a_3", "a_2", "before" );
         Menu<String> menu4 = MenuFactory.fromMenuNodes ( list );
         System.out.println ( menu4 );
 
-        MenuNodeUtil.cutAndPaste ( list, "a_3", "a_2", "after" );
+        MenuNodeOperator.cutAndPaste ( list, "a_3", "a_2", "after" );
         Menu<String> menu5 = MenuFactory.fromMenuNodes ( list );
         System.out.println ( menu5 );
 
-        MenuNodeUtil.cutAndPaste ( list, "a_4", "a_2", "inner_before" );
+        MenuNodeOperator.cutAndPaste ( list, "a_4", "a_2", "inner_before" );
         Menu<String> menu6 = MenuFactory.fromMenuNodes ( list );
         System.out.println ( menu6 );
 

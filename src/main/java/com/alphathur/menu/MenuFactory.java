@@ -3,11 +3,14 @@ package com.alphathur.menu;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * a factory can use menu-node to build a menu tree
+ */
 public class MenuFactory {
 
     public static final Menu fromMenuNodes(List<MenuNode> menuNodes) {
         menuNodes = menuNodes.stream ()
-                .sorted ( Comparator.comparingInt ( o -> MenuNodeUtil.code2Int ( o.getCode () ) ) )
+                .sorted ( Comparator.comparingInt ( o -> MenuNodeOperator.code2Int ( o.getCode () ) ) )
                 .collect ( Collectors.toList () );
         if (menuNodes == null || menuNodes.isEmpty ()) {
             return null;
@@ -24,66 +27,66 @@ public class MenuFactory {
             }
             if (arr.length == 2) {
                 String firKey = arr[0];
-                Set<MenuNode> boardSet = firMap.computeIfAbsent ( firKey, k -> new LinkedHashSet<> () );
-                boardSet.add ( menuNode );
+                Set<MenuNode> nodeSet = firMap.computeIfAbsent ( firKey, k -> new LinkedHashSet<> () );
+                nodeSet.add ( menuNode );
             }
             if (arr.length == 3) {
                 String secKey = arr[0] + "_" + arr[1];
-                Set<MenuNode> boardSet = secMap.computeIfAbsent ( secKey, k -> new LinkedHashSet<> () );
-                boardSet.add ( menuNode );
+                Set<MenuNode> nodeSet = secMap.computeIfAbsent ( secKey, k -> new LinkedHashSet<> () );
+                nodeSet.add ( menuNode );
             }
             if (arr.length == 4) {
                 String thrKey = arr[0] + "_" + arr[1] + "_" + arr[2];
-                Set<MenuNode> boardSet = thrMap.computeIfAbsent ( thrKey, k -> new LinkedHashSet<> () );
-                boardSet.add ( menuNode );
+                Set<MenuNode> nodeSet = thrMap.computeIfAbsent ( thrKey, k -> new LinkedHashSet<> () );
+                nodeSet.add ( menuNode );
             }
         }
         if (root == null) {
             throw new RuntimeException ( "NO ROOT" );
         }
         List<Menu> results = new ArrayList<> ();
-        Menu rootDashBoard = buildFromBoard ( root );
-        results.add ( rootDashBoard );
+        Menu rootNode = buildFromNode ( root );
+        results.add ( rootNode );
 
-        Set<MenuNode> firSet = firMap.get ( rootDashBoard.getCode () );
-        List<Menu> firBoards = buildFromBoards ( firSet );
-        rootDashBoard.setChildren ( firBoards );
+        Set<MenuNode> firSet = firMap.get ( rootNode.getCode () );
+        List<Menu> firNodes = buildFromNodes ( firSet );
+        rootNode.setChildren ( firNodes );
 
-        List<Menu> allSecBoards = new ArrayList<> ();
+        List<Menu> allSecNodes = new ArrayList<> ();
 
-        firBoards.forEach ( firBoard -> {
-            Set<MenuNode> secSet = secMap.get ( firBoard.getCode () );
-            List<Menu> secBoards = buildFromBoards ( secSet );
-            firBoard.setChildren ( secBoards );
-            allSecBoards.addAll ( secBoards );
+        firNodes.forEach ( firNode -> {
+            Set<MenuNode> secSet = secMap.get ( firNode.getCode () );
+            List<Menu> secNodes = buildFromNodes ( secSet );
+            firNode.setChildren ( secNodes );
+            allSecNodes.addAll ( secNodes );
         } );
 
-        allSecBoards.forEach ( secBoard -> {
-            Set<MenuNode> thrSet = thrMap.get ( secBoard.getCode () );
-            List<Menu> thrBoards = buildFromBoards ( thrSet );
-            secBoard.setChildren ( thrBoards );
+        allSecNodes.forEach ( secNode -> {
+            Set<MenuNode> thrSet = thrMap.get ( secNode.getCode () );
+            List<Menu> thrNodes = buildFromNodes ( thrSet );
+            secNode.setChildren ( thrNodes );
         } );
 
-        return rootDashBoard;
+        return rootNode;
     }
 
-    private static List<Menu> buildFromBoards(Set<MenuNode> set) {
-        List<Menu> dashboards = new ArrayList<> ();
+    private static List<Menu> buildFromNodes(Set<MenuNode> set) {
+        List<Menu> menus = new ArrayList<> ();
         if (set == null || set.isEmpty ()) {
-            return dashboards;
+            return menus;
         }
         set.forEach ( menuNode -> {
-            Menu dashboard = buildFromBoard ( menuNode );
-            dashboards.add ( dashboard );
+            Menu menu = buildFromNode ( menuNode );
+            menus.add ( menu );
         } );
-        return dashboards;
+        return menus;
     }
 
-    private static Menu buildFromBoard(MenuNode board) {
+    private static Menu buildFromNode(MenuNode node) {
         Menu menu = new Menu ();
-        menu.setCode ( board.getCode () );
-        menu.setName ( board.getName () );
-        menu.setData ( board.getData () );
+        menu.setCode ( node.getCode () );
+        menu.setName ( node.getName () );
+        menu.setData ( node.getData () );
         return menu;
     }
 }
