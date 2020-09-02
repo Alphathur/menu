@@ -1,6 +1,11 @@
 # menu
 Menu struct implemented by Java
-## Run test codes
+## How did it works
+if we define a root menu and index it by `a`,then the first level menu can be indexed by `a_1`, `a_2`, `a_3`...<p>
+if the first level menu indexed by `a_1`, then the second level menu can be indexed by`a_1_1`, `a_1_2`, `a_1_3`...<p>
+if the second level menu indexed by `a_1_2`, then the third level menu can be indexed by `a_1_2_1`, `a_1_2_2`, `a_1_2_3`...<p>
+so that's a menu struct, it looks like a node but not implemented by node.<p>
+## Run test codes, and it prints those lines
 ```java
 Menu{code='a', name='root menu', data=this is a root menu, children=[Menu{code='a_1', name='menu 1', data=this is a first level menu, children=[]}, Menu{code='a_2', name='menu 2', data=this is a first level menu, children=[Menu{code='a_2_1', name='new node a20', data=null, children=[]}, Menu{code='a_2_2', name='menu 21', data=this is a second level menu, children=[]}]}]}
 Menu{code='a', name='root menu', data=this is a root menu, children=[Menu{code='a_1', name='menu 1', data=this is a first level menu, children=[]}, Menu{code='a_2', name='menu 2', data=this is a first level menu, children=[Menu{code='a_2_1', name='new node a20', data=null, children=[]}, Menu{code='a_2_2', name='menu 21', data=this is a second level menu, children=[]}, Menu{code='a_2_3', name='new node a21', data=null, children=[]}]}]}
